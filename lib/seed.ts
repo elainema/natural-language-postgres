@@ -23,7 +23,7 @@ export async function seed() {
   // 创建连接池，使用 nodejs-native 模式直接连接到数据库
   const pool = createPool({
     connectionString: process.env.POSTGRES_URL,
-    mode: 'nodejs-native' // 使用本地模式，避免使用 Vercel 的代理服务
+   // mode: 'nodejs-native' // 使用本地模式，避免使用 Vercel 的代理服务
   });
   
   try {
