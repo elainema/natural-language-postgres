@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres';
+import { createPool } from '@vercel/postgres';
 import fs from 'fs';
 import csv from 'csv-parser';
 import path from 'path';
@@ -18,18 +18,30 @@ function parseDate(dateString: string): string {
 }
 
 export async function seed() {
-  const createTable = await sql`
-    CREATE TABLE IF NOT EXISTS unicorns (
-      id SERIAL PRIMARY KEY,
-      company VARCHAR(255) NOT NULL UNIQUE,
-      valuation DECIMAL(10, 2) NOT NULL,
-      date_joined DATE,
-      country VARCHAR(255) NOT NULL,
-      city VARCHAR(255) NOT NULL,
-      industry VARCHAR(255) NOT NULL,
-      select_investors TEXT NOT NULL
-    );
-  `;
+  console.log('Connecting to database using nodejs-native mode...');
+  
+  // 创建连接池，使用 nodejs-native 模式直接连接到数据库
+  const pool = createPool({
+    connectionString: process.env.POSTGRES_URL,
+    mode: 'nodejs-native' // 使用本地模式，避免使用 Vercel 的代理服务
+  });
+  
+  try {
+    // 创建表
+    const createTable = await pool.query(`
+      CREATE TABLE IF NOT EXISTS unicorns (
+        id SERIAL PRIMARY KEY,
+        company VARCHAR(255) NOT NULL UNIQUE,
+        valuation DECIMAL(10, 2) NOT NULL,
+        date_joined DATE,
+        country VARCHAR(255) NOT NULL,
+        city VARCHAR(255) NOT NULL,
+        industry VARCHAR(255) NOT NULL,
+        select_investors TEXT NOT NULL
+      );
+    `);
+    
+    console.log('Successfully connected to database');
 
   console.log(`Created "unicorns" table`);
 
@@ -45,30 +57,40 @@ export async function seed() {
   });
 
   for (const row of results) {
-    console.log("row is:", row['Date Joined'])
-    const formattedDate = parseDate(row['Date Joined']);
-
-    await sql`
-      INSERT INTO unicorns (company, valuation, date_joined, country, city, industry, select_investors)
-      VALUES (
-        ${row.Company},
-        ${parseFloat(row['Valuation ($B)'].replace('$', '').replace(',', ''))},
-        ${formattedDate},
-        ${row.Country},
-        ${row.City},
-        ${row.Industry},
-        ${row['Select Investors']}
-      )
-      ON CONFLICT (company) DO NOTHING;
-    `;
+    try {
+      console.log("Processing row:", row.Company, "Date:", row['Date Joined']);
+      const formattedDate = parseDate(row['Date Joined']);
+      
+      await pool.query(
+        `INSERT INTO unicorns (company, valuation, date_joined, country, city, industry, select_investors)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (company) DO NOTHING;`,
+        [
+          row.Company,
+          parseFloat(row['Valuation ($B)'].replace('$', '').replace(',', '')),
+          formattedDate,
+          row.Country,
+          row.City,
+          row.Industry,
+          row['Select Investors']
+        ]
+      );
+      
+      console.log(`Successfully inserted: ${row.Company}`);
+    } catch (error) {
+      console.error(`Error inserting row: ${row.Company}`, error);
+    }
   }
 
-  console.log(`Seeded ${results.length} unicorns`);
-
-  return {
-    createTable,
-    unicorns: results,
-  };
+    console.log(`Successfully seeded ${results.length} unicorns`);
+    
+    return {
+      unicorns: results,
+    };
+  } catch (error) {
+    console.error('Database operation failed:', error);
+    throw error;
+  }
 }
 
 
