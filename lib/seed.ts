@@ -5,6 +5,7 @@ import path from 'path';
 import "dotenv/config"
 
 function parseDate(dateString: string): string {
+  console.log("dateString is:", dateString)
   const parts = dateString.split('/');
   if (parts.length === 3) {
     const day = parts[0].padStart(2, '0');
@@ -44,6 +45,7 @@ export async function seed() {
   });
 
   for (const row of results) {
+    console.log("row is:", row['Date Joined'])
     const formattedDate = parseDate(row['Date Joined']);
 
     await sql`
