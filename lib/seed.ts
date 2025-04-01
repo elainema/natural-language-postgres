@@ -1,3 +1,4 @@
+// Database seed script 
 import { createPool } from '@vercel/postgres';
 import fs from 'fs';
 import csv from 'csv-parser';
@@ -5,7 +6,7 @@ import path from 'path';
 import "dotenv/config"
 
 function parseDate(dateString: string): string {
-  console.log("dateString is:", dateString)
+  return dateString;
   const parts = dateString.split('/');
   if (parts.length === 3) {
     const day = parts[0].padStart(2, '0');

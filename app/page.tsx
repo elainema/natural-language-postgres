@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Config, Result } from "@/lib/types";
-import { runGeneratedSQLQuery } from "./actions";
+import { generateQuery, generateChartConfig,runGeneratedSQLQuery } from './actions';
 
 import { Header } from "@/components/header";
 import { QueryViewer } from "@/components/query-viewer";
@@ -45,7 +45,7 @@ export default function Page() {
     setActiveQuery("");
 
     try {
-      const query = "TODO - IMPLEMENT ABOVE"; // placeholder value
+      const query = await generateQuery(question.trim());
 
       if (query === undefined) {
         toast.error("An error occurred. Please try again.");
@@ -56,12 +56,15 @@ export default function Page() {
       setActiveQuery(query);
       setLoadingStep(2);
 
+
       const companies = await runGeneratedSQLQuery(query);
       const columns = companies.length > 0 ? Object.keys(companies[0]) : [];
       setResults(companies);
       setColumns(columns);
 
       setLoading(false);
+      const { config } = await generateChartConfig(companies, question);
+      setChartConfig(config);
     } catch (e) {
       toast.error("An error occurred. Please try again.");
       setLoading(false);
