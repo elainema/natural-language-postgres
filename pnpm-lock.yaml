@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@ai-sdk/deepinfra':
+    specifier: ^0.2.4
+    version: 0.2.4(zod@3.24.2)
   '@ai-sdk/deepseek':
     specifier: ^0.2.4
     version: 0.2.4(zod@3.24.2)
@@ -129,6 +132,18 @@ devDependencies:
     version: 4.19.3
 
 packages:
+
+  /@ai-sdk/deepinfra@0.2.4(zod@3.24.2):
+    resolution: {integrity: sha512-JBF3tUOLYgQDCwkvN9I5ZbSqsAxTJWOKmIpyJXJl5RpLXOEviJUqpKSZufs11J9S4Z0U9vZX9jfhO1+DBjS56w==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.0.0
+    dependencies:
+      '@ai-sdk/openai-compatible': 0.2.4(zod@3.24.2)
+      '@ai-sdk/provider': 1.1.0
+      '@ai-sdk/provider-utils': 2.2.3(zod@3.24.2)
+      zod: 3.24.2
+    dev: false
 
   /@ai-sdk/deepseek@0.2.4(zod@3.24.2):
     resolution: {integrity: sha512-D98J+qgZbr3qYoQCIfkd1E6SzmGPi7SelskvxT2329eCC7sPBlbHNbRT/fayShQT3qkqd7u/y24beI2rmMAuMg==}

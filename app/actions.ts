@@ -1,15 +1,18 @@
 "use server";
 // 运行 SQL 查询的函数
 import { sql } from "@vercel/postgres";
-import { Config, configSchema, explanationsSchema, Result } from '@/lib/types';
+import { Config, configSchema, explanationSchema, Result } from '@/lib/types';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { createDeepSeek } from '@ai-sdk/deepseek';
+import { deepinfra } from '@ai-sdk/deepinfra';
 
 
 const deepseek = createDeepSeek({
     apiKey: process.env.OPENAI_API_KEY ?? '',
 });
+// const model =  deepseek('deepseek-chat')
+const model = deepinfra('meta-llama/Meta-Llama-3.1-405B-Instruct')
 
 /**
  * Executes a SQL query and returns the result data
@@ -68,7 +71,7 @@ export const generateQuery = async (input: string) => {
   'use server';
   try {
     const result = await generateObject({
-      model: deepseek('deepseek-chat'),
+      model: model,
       system: `You are a SQL (postgres) and data visualization expert. Your job is to help the user write a SQL query to retrieve the data they need. The table schema is as follows:
 
       unicorns (
@@ -136,7 +139,7 @@ export const explainQuery = async (input: string, sqlQuery: string) => {
   'use server';
   try {
     const result = await generateObject({
-      model: deepseek('deepseek-chat'),
+      model: model,
       system: `You are a SQL (postgres) expert. ...`, // SYSTEM PROMPT AS ABOVE - OMITTED FOR BREVITY
       prompt: `Explain the SQL query you generated to retrieve the data the user wanted. Assume the user is not an expert in SQL. Break down the query into steps. Be concise.
 
@@ -176,7 +179,7 @@ export const generateChartConfig = async (
 
   try {
     const { object: config } = await generateObject({
-      model: deepseek('deepseek-chat'),
+      model: model,
       system: 'You are a data visualization expert.',
       prompt: `Given the following data from a SQL query result, generate the chart config that best visualises the data and answers the users query.
       For multiple groups use multi-lines.
