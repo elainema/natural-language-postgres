@@ -7,12 +7,14 @@ import { z } from 'zod';
 import { createDeepSeek } from '@ai-sdk/deepseek';
 import { deepinfra } from '@ai-sdk/deepinfra';
 
-
 const deepseek = createDeepSeek({
     apiKey: process.env.OPENAI_API_KEY ?? '',
 });
 // const model =  deepseek('deepseek-chat')
 const model = deepinfra('meta-llama/Meta-Llama-3.1-405B-Instruct')
+
+
+
 
 /**
  * Executes a SQL query and returns the result data
